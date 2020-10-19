@@ -1,23 +1,33 @@
 package main
 
 import (
-	"io"
-	"os"
-
+	"C"
+	"encoding/json"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
+	"io"
+	"os"
 )
 
 func main() {
-
+	//t1 := time.Now()
+	//pubKey := "E:/qq2/1.pub"
+	//fileToEnc := "E:/qq2/qq2.zip"
+	//pubKey2 := C.CString(pubKey)
+	//fileToSave := C.CString(fileToEnc + ".pgpG")
+	//fileToEnc2 := C.CString(fileToEnc)
+	//msg := EncryptByPubKey(pubKey2, fileToEnc2, fileToSave)
+	//fmt.Println(C.GoString(msg))
+	//t2 := time.Since(t1)
+	//fmt.Println(t2)
 }
 
-// EncryptByPubKey 使用公钥加密文件
-// pubKey 公钥文件路径
-// toEnc 待加密文件路径
-// toSave 加密文件保存路径
-func EncryptByPubKey(pubKey, toEnc, toSave string) Resp {
+//export EncryptByPubKey
+func EncryptByPubKey(_pubKey, _toEnc, _toSave *C.char) *C.char {
+	pubKey := C.GoString(_pubKey)
+	toEnc := C.GoString(_toEnc)
+	toSave := C.GoString(_toSave)
 	recipient, err := readEntity(pubKey)
 	if err != nil {
 		return fail(err.Error())
@@ -41,11 +51,11 @@ func EncryptByPubKey(pubKey, toEnc, toSave string) Resp {
 	return ok(toSave)
 }
 
-// EncryptByPsw 使用密码加密文件
-// psw 密码
-// toEnc 待加密文件路径
-// toSave 加密文件保存路径
-func EncryptByPsw(psw, toEnc, toSave string) Resp {
+//export EncryptByPsw
+func EncryptByPsw(_psw, _toEnc, _toSave *C.char) *C.char {
+	psw := C.GoString(_psw)
+	toEnc := C.GoString(_toEnc)
+	toSave := C.GoString(_toSave)
 	f, err := os.Open(toEnc)
 	if err != nil {
 		return fail(err.Error())
@@ -99,23 +109,25 @@ func readEntity(name string) (*openpgp.Entity, error) {
 }
 
 type Resp struct {
-	code int
-	msg  string
-	data interface{}
+	Code int         `json:"Code"`
+	Msg  string      `json:"Msg"`
+	Data interface{} `json:"Data"`
 }
 
-func ok(data interface{}) Resp {
-	return Resp{
-		code: 200,
-		msg:  "ok",
-		data: data,
-	}
+func ok(data interface{}) *C.char {
+	resp, _ := json.Marshal(Resp{
+		Code: 200,
+		Msg: "ok",
+		Data: data,
+	})
+	return C.CString(string(resp))
 }
 
-func fail(msg string) Resp {
-	return Resp{
-		code: 500,
-		msg:  msg,
-		data: nil,
-	}
+func fail(msg string) *C.char {
+	resp, _ := json.Marshal(Resp{
+		Code: 500,
+		Msg: msg,
+		Data: nil,
+	})
+	return C.CString(string(resp))
 }
