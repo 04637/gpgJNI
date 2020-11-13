@@ -27,18 +27,18 @@ func EncryptByPubKey(_pubKey, _toEnc, _toSave *C.char) *C.char {
 
 	f, err := os.Open(toEnc)
 	if err != nil {
-		return fail(err.Error())
+		return fail("open " + toEnc + ": cannot find the file specified.")
 	}
 	defer f.Close()
 
 	dst, err := os.Create(toSave)
 	if err != nil {
-		return fail(err.Error())
+		return fail("create " + toSave + ": error.")
 	}
 	defer dst.Close()
 	err = encrypt([]*openpgp.Entity{recipient}, nil, f, dst)
 	if err != nil {
-		return fail(err.Error())
+		return fail("encrypt error.")
 	}
 	return ok(url.QueryEscape(toSave))
 }
@@ -50,17 +50,17 @@ func EncryptByPsw(_psw, _toEnc, _toSave *C.char) *C.char {
 	toSave, _ := url.QueryUnescape(C.GoString(_toSave))
 	f, err := os.Open(toEnc)
 	if err != nil {
-		return fail(err.Error())
+		return fail("open " + toEnc + ": cannot find the file specified.")
 	}
 	defer f.Close()
 
 	dst, err := os.Create(toSave)
 	if err != nil {
-		return fail(err.Error())
+		return fail("create " + toSave + ": error.")
 	}
 	err = symEncrypt([]byte(psw), f, dst)
 	if err != nil {
-		return fail(err.Error())
+		return fail("encrypt error.")
 	}
 	return ok(url.QueryEscape(toSave))
 }
@@ -118,7 +118,7 @@ func ok(data interface{}) *C.char {
 func fail(msg string) *C.char {
 	resp, _ := json.Marshal(Resp{
 		Code: 500,
-		Msg:  msg,
+		Msg:  url.QueryEscape(msg),
 		Data: nil,
 	})
 	return C.CString(string(resp))
