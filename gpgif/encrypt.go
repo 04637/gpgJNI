@@ -7,6 +7,7 @@ import (
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
 	"io"
+	"net/url"
 	"os"
 )
 
@@ -16,9 +17,9 @@ func main() {
 
 //export EncryptByPubKey
 func EncryptByPubKey(_pubKey, _toEnc, _toSave *C.char) *C.char {
-	pubKey := C.GoString(_pubKey)
-	toEnc := C.GoString(_toEnc)
-	toSave := C.GoString(_toSave)
+	pubKey, _ := url.QueryUnescape(C.GoString(_pubKey))
+	toEnc, _ := url.QueryUnescape(C.GoString(_toEnc))
+	toSave, _ := url.QueryUnescape(C.GoString(_toSave))
 	recipient, err := readEntity(pubKey)
 	if err != nil {
 		return fail(err.Error())
@@ -39,14 +40,14 @@ func EncryptByPubKey(_pubKey, _toEnc, _toSave *C.char) *C.char {
 	if err != nil {
 		return fail(err.Error())
 	}
-	return ok(toSave)
+	return ok(url.QueryEscape(toSave))
 }
 
 //export EncryptByPsw
 func EncryptByPsw(_psw, _toEnc, _toSave *C.char) *C.char {
 	psw := C.GoString(_psw)
-	toEnc := C.GoString(_toEnc)
-	toSave := C.GoString(_toSave)
+	toEnc, _ := url.QueryUnescape(C.GoString(_toEnc))
+	toSave, _ := url.QueryUnescape(C.GoString(_toSave))
 	f, err := os.Open(toEnc)
 	if err != nil {
 		return fail(err.Error())
@@ -61,7 +62,7 @@ func EncryptByPsw(_psw, _toEnc, _toSave *C.char) *C.char {
 	if err != nil {
 		return fail(err.Error())
 	}
-	return ok(toSave)
+	return ok(url.QueryEscape(toSave))
 }
 
 func encrypt(recipient []*openpgp.Entity, signer *openpgp.Entity, r io.Reader, w io.Writer) error {
@@ -108,7 +109,7 @@ type Resp struct {
 func ok(data interface{}) *C.char {
 	resp, _ := json.Marshal(Resp{
 		Code: 200,
-		Msg: "ok",
+		Msg:  "ok",
 		Data: data,
 	})
 	return C.CString(string(resp))
@@ -117,7 +118,7 @@ func ok(data interface{}) *C.char {
 func fail(msg string) *C.char {
 	resp, _ := json.Marshal(Resp{
 		Code: 500,
-		Msg: msg,
+		Msg:  msg,
 		Data: nil,
 	})
 	return C.CString(string(resp))
