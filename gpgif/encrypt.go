@@ -38,7 +38,7 @@ func EncryptByPubKey(_pubKey, _toEnc, _toSave *C.char) *C.char {
 	defer dst.Close()
 	err = encrypt([]*openpgp.Entity{recipient}, nil, f, dst)
 	if err != nil {
-		return fail("encrypt error.")
+		return fail(err.Error())
 	}
 	return ok(url.QueryEscape(toSave))
 }
@@ -60,7 +60,7 @@ func EncryptByPsw(_psw, _toEnc, _toSave *C.char) *C.char {
 	}
 	err = symEncrypt([]byte(psw), f, dst)
 	if err != nil {
-		return fail("encrypt error.")
+		return fail(err.Error())
 	}
 	return ok(url.QueryEscape(toSave))
 }
