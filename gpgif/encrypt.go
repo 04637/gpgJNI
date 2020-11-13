@@ -11,16 +11,7 @@ import (
 )
 
 func main() {
-	//t1 := time.Now()
-	//pubKey := "E:/qq2/1.pub"
-	//fileToEnc := "E:/qq2/qq2.zip"
-	//pubKey2 := C.CString(pubKey)
-	//fileToSave := C.CString(fileToEnc + ".pgpG")
-	//fileToEnc2 := C.CString(fileToEnc)
-	//msg := EncryptByPubKey(pubKey2, fileToEnc2, fileToSave)
-	//fmt.Println(C.GoString(msg))
-	//t2 := time.Since(t1)
-	//fmt.Println(t2)
+
 }
 
 //export EncryptByPubKey

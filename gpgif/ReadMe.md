@@ -5,4 +5,4 @@
 
 > linux:
 >
-`go build -buildmode=c-shared -o linuxgpg.so ./encrypt.go`
+`go build -buildmode=c-shared -o liblinuxgpg.so ./encrypt.go`
